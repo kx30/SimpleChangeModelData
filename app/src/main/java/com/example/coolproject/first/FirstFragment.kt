@@ -1,15 +1,20 @@
-package com.example.coolproject
+package com.example.coolproject.first
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import com.example.coolproject.CoolModel
+import com.example.coolproject.R
+import com.example.coolproject.second.SecondFragment
 import kotlinx.android.synthetic.main.fragment_first.*
+import moxy.MvpAppCompatFragment
+import moxy.presenter.InjectPresenter
 
-class FirstFragment : Fragment() {
+class FirstFragment : MvpAppCompatFragment(), FirstView {
 
-    private lateinit var someCoolModel: CoolModel
+    @InjectPresenter
+    lateinit var presenter: FirstPresenter
 
 
     override fun onCreateView(
@@ -22,22 +27,20 @@ class FirstFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        someCoolModel = arguments?.getSerializable("CoolModel") as CoolModel
+        presenter.someCoolModel = arguments?.getSerializable("CoolModel") as CoolModel
         setListeners()
     }
 
     override fun onResume() {
         super.onResume()
-        coolModelNameTextView.text = someCoolModel.name
+        presenter.onViewResume()
     }
 
-    private fun setListeners() {
-        coolModelNameTextView.setOnClickListener {
-            openSecondFragment()
-        }
+    override fun updateCoolTextView(name: String) {
+        coolModelNameTextView.text = name
     }
 
-    private fun openSecondFragment() {
+    override fun openSecondFragment(someCoolModel: CoolModel) {
         val fragment = SecondFragment()
         val bundle = Bundle()
         bundle.putSerializable("CoolModel", someCoolModel)
@@ -48,5 +51,11 @@ class FirstFragment : Fragment() {
             ?.addToBackStack(null)
             ?.replace(R.id.fragmentContainer, fragment)
             ?.commit()
+    }
+
+    private fun setListeners() {
+        coolModelNameTextView.setOnClickListener {
+            presenter.onCoolModelNameTextViewClicked()
+        }
     }
 }
